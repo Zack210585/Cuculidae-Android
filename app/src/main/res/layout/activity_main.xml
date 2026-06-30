@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="24dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="100dp">
+
+        </FrameLayout>
+
+        <Button
+            android:id="@+id/btn_Wifi"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="Share Wifi"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/btn_sync"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="Sync Cuculidae"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/btn_weather"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="Weather"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/btn_calendar"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="Calendar"
+            android:textSize="18sp" />
+
+    </LinearLayout>
+
+</RelativeLayout>
