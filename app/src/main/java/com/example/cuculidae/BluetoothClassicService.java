@@ -112,6 +112,7 @@ public class BluetoothClassicService extends Service {
             socket = tmp;
         }
 
+
         @RequiresPermission(Manifest.permission.BLUETOOTH_SCAN)
         public void run() {
             if (ActivityCompat.checkSelfPermission(BluetoothClassicService.this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
