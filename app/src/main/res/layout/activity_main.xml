@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="24dp">
@@ -9,119 +10,126 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <FrameLayout
+        <TextView
+            android:id="@+id/textView"
             android:layout_width="match_parent"
-            android:layout_height="40dp">
+            android:layout_height="wrap_content"
+            android:text="Cuculidae"
+            android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
 
-        </FrameLayout>
+        <Button
+            android:id="@+id/btn_Wifi"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/material_dynamic_neutral10"
+            android:text="Share Wifi"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/btn_sync"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/material_dynamic_neutral10"
+            android:text="Sync Time"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/btn_weather"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/material_dynamic_neutral10"
+            android:text="Sync Weather"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/btn_calendar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/material_dynamic_neutral10"
+            android:text="Sync Calendar"
+            android:textSize="18sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="bottom"
             android:orientation="vertical">
 
-            <LinearLayout
+            <Switch
+                android:id="@+id/switch1"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:text="Sound: Day" />
 
-                <TextView
-                    android:id="@+id/textView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Cuculidae"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
+            <SeekBar
+                android:id="@+id/seekBar1"
+                style="@android:style/Widget.SeekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:progressTint="@color/material_dynamic_neutral10" />
 
-                <Button
-                    android:id="@+id/btn_Wifi"
-                    android:layout_width="match_parent"
-                    android:layout_height="60dp"
-                    android:text="Share Wifi"
-                    android:textSize="18sp" />
+            <Switch
+                android:id="@+id/switch2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:text="Sound: Night" />
 
-                <Button
-                    android:id="@+id/btn_sync"
-                    android:layout_width="match_parent"
-                    android:layout_height="60dp"
-                    android:text="Sync Time"
-                    android:textSize="18sp" />
+            <SeekBar
+                android:id="@+id/seekBar2"
+                style="@android:style/Widget.SeekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:progressTint="@color/material_dynamic_neutral10" />
 
-                <Button
-                    android:id="@+id/btn_weather"
-                    android:layout_width="match_parent"
-                    android:layout_height="60dp"
-                    android:text="Sync Weather"
-                    android:textSize="18sp" />
+            <Switch
+                android:id="@+id/switch3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:buttonTint="@color/material_dynamic_neutral10"
+                android:minHeight="48dp"
+                android:text="Movement: Day" />
 
-                <Button
-                    android:id="@+id/btn_calendar"
-                    android:layout_width="match_parent"
-                    android:layout_height="60dp"
-                    android:text="Sync Calendar"
-                    android:textSize="18sp" />
+            <Switch
+                android:id="@+id/switch4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:buttonTint="@color/material_dynamic_neutral10"
+                android:minHeight="48dp"
+                android:text="Movement: Night" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="bottom"
-                    android:orientation="vertical">
+            <Switch
+                android:id="@+id/switch5"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:buttonTint="@color/material_dynamic_neutral10"
+                android:minHeight="48dp"
+                android:text="Lights: Day" />
 
-                    <Switch
-                        android:id="@+id/switch1"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:minHeight="48dp"
-                        android:text="Sound: Day" />
+            <Switch
+                android:id="@+id/switch6"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:buttonTint="@color/material_dynamic_neutral10"
+                android:minHeight="48dp"
+                android:text="Lights: Night" />
 
-                    <SeekBar
-                        android:id="@+id/seekBar2"
-                        style="@android:style/Widget.DeviceDefault.SeekBar"
-                        android:layout_width="match_parent"
-                        android:layout_height="40dp" />
+            <Switch
+                android:id="@+id/switch7"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:buttonTint="@color/material_dynamic_neutral10"
+                android:minHeight="48dp"
+                android:text="Smoke: Day" />
 
-                    <Switch
-                        android:id="@+id/switch2"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:minHeight="48dp"
-                        android:text="Sound: Day/ Night" />
-
-                    <SeekBar
-                        android:id="@+id/seekBar"
-                        style="@android:style/Widget.DeviceDefault.SeekBar"
-                        android:layout_width="match_parent"
-                        android:layout_height="40dp" />
-
-                    <Switch
-                        android:id="@+id/switch3"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:minHeight="48dp"
-                        android:text="Movement: Day" />
-
-                    <Switch
-                        android:id="@+id/switch4"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:minHeight="48dp"
-                        android:text="Movement: Day/ Night" />
-
-                    <Switch
-                        android:id="@+id/switch5"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:minHeight="48dp"
-                        android:text="Lights" />
-
-                    <Switch
-                        android:id="@+id/switch6"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:minHeight="48dp"
-                        android:text="Smoke" />
-
-                </LinearLayout>
-            </LinearLayout>
+            <Switch
+                android:id="@+id/switch8"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:buttonTint="@color/material_dynamic_neutral10"
+                android:minHeight="48dp"
+                android:text="Smoke: Night" />
 
         </LinearLayout>
     </LinearLayout>
