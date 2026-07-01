@@ -160,7 +160,6 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     promptUserToEnableWifi();
                 }
-                bluetoothService.sendDataToESP32("Wifi");
             } else {
                 Toast.makeText(this, "Cuculidae is not connected yet.", Toast.LENGTH_SHORT).show();
                 if (isBound && bluetoothService != null && !bluetoothService.startAutoConnectLoop()) {
@@ -453,7 +452,7 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     // Formatted package: "LOC[US]City[US]Country\n"
-                    String locationPayload = "LOC" + US + city + US + country + "\n";
+                    String locationPayload = "LO" + US + city + US + country + "\n";
                     bluetoothService.sendDataToESP32(locationPayload);
                 }
             } catch (IOException e) {
@@ -575,7 +574,7 @@ public class MainActivity extends AppCompatActivity {
                     final int finalTemp = temperature;
                     final int finalHumidity = humidity;
 
-                    StringBuilder payload = new StringBuilder("WT");
+                    StringBuilder payload = new StringBuilder("WE");
                     for (int i = 0; i < 7; i++) {
                         int max = finalTemp + (i % 3);
                         int min = finalTemp - 4 - (i % 2);
@@ -749,7 +748,7 @@ public class MainActivity extends AppCompatActivity {
             }
             cursor.close();
 
-            String finalPayload = "CAL" + US + count + eventLoopPayload.toString() + "\n";
+            String finalPayload = "CA" + US + count + eventLoopPayload.toString() + "\n";
 
             if (targetIpAddress != null) {
                 sendDataOverWifi(targetIpAddress, finalPayload);
