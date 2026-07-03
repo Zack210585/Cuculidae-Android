@@ -96,6 +96,22 @@ public class MainActivity extends ComponentActivity {
             }
         }
     };
+    private final android.content.BroadcastReceiver bluetoothReceiver = new android.content.BroadcastReceiver() {
+        @Override
+        public void onReceive(android.content.Context context, android.content.Intent intent) {
+            if ("CUCULIDAE_BLUETOOTH_DATA".equals(intent.getAction())) {
+                String incomingString = intent.getStringExtra("raw_text");
+
+                if (incomingString != null) {
+                    // 🎯 SUCCESS: This Toast will now fire and show exactly what the brain sent!
+                    Toast.makeText(MainActivity.this, "hi: " + incomingString, Toast.LENGTH_SHORT).show();
+
+                    // Route the data straight into your visual layout parsing logic right after
+                    handleIncomingStateDump(incomingString.trim());
+                }
+            }
+        }
+    };
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -935,5 +951,18 @@ public class MainActivity extends ComponentActivity {
 
     private void restoreUiListeners() {
         // Re-attach your operational switch and slider action listeners here
+    }
+    @Override
+    protected void onStart() {
+        super.onStart();
+        android.content.IntentFilter filter = new android.content.IntentFilter("CUCULIDAE_BLUETOOTH_DATA");
+        registerReceiver(bluetoothReceiver, filter, android.content.Context.RECEIVER_NOT_EXPORTED);
+    }
+
+    // 3. Unregister the listener when the app closes to preserve battery life
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unregisterReceiver(bluetoothReceiver);
     }
 }

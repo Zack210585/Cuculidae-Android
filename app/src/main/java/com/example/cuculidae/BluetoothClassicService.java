@@ -203,23 +203,21 @@ public class BluetoothClassicService extends Service {
             byte[] buffer = new byte[1024];
             int bytes;
             android.util.Log.d("Cuculidae_BLE", "Connected worker thread active. Listening for incoming bytes...");
-            while (isConnected) {
+            while (true) {
                 try {
-                    if (mmInStream != null) {
-                        bytes = mmInStream.read(buffer);
-                        String incoming = new String(buffer, 0, bytes);
-                        if (dataListener != null) {
-                            dataListener.onDataReceived(incoming);
+                    bytes = mmInStream.read(buffer);
+                    String incomingString = new String(buffer, 0, bytes).trim();
 
-                        }
-                        android.util.Log.i("Cuculidae_BLE", "Received raw text payload from ESP32: " + incoming);
-                    }
+                    // 🚀 FIX: Broadcast the incoming text string locally across the app environment
+                    Intent intent = new Intent("CUCULIDAE_BLUETOOTH_DATA");
+                    intent.putExtra("raw_text", incomingString);
+                    sendBroadcast(intent);
+
                 } catch (IOException e) {
-                    android.util.Log.e("Cuculidae_BLE", "Connection stream disconnected/lost", e);
-                    connectionLost();
                     break;
                 }
             }
+
         }
 
         public void write(byte[] bytes) {
