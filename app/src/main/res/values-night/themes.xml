@@ -1,7 +1,17 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.Cuculidae" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://android.com">
+    <!-- 1. Match the exact AppCompat parent theme for Night Mode -->
+    <style name="Base.Theme.Cuculidae" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <!-- Customize your dark theme colors here if needed -->
+    </style>
+
+    <!-- 2. Unified application theme style -->
+    <style name="Theme.Cuculidae" parent="Base.Theme.Cuculidae" />
+
+    <!-- 3. Splash Screen API Theme style configuration -->
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#121212</item> <!-- Dark background for night mode splash -->
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.Cuculidae</item>
     </style>
 </resources>

@@ -36,6 +36,8 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.Toast;
+
+import androidx.activity.ComponentActivity;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
@@ -60,8 +62,23 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.view.View;
+import android.widget.SeekBar;
+import android.widget.Switch;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.splashscreen.SplashScreen;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends ComponentActivity {
+    private boolean isDataSynced = false;
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private static final int CONNECTION_TIMEOUT_MS = 5000; // 5 seconds to find/connect to clock
+    private Switch switchSoundDay, switchMovementDay, switchMovementNight, switchSoundNight;
+    private Switch switchLightsDay, switchLightsNight, switchSmokeDay, switchSmokeNight;
+    private SeekBar barSoundDay, barSoundNight;
     private BluetoothClassicService bluetoothService;
     private WifiManager wifiManager;
     private boolean isBound = false;
@@ -144,8 +161,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        // Initialize networking utility architectures
         wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         volleyRequestQueue = Volley.newRequestQueue(this);
         View rootLayout = findViewById(R.id.main_root_layout);
@@ -159,7 +174,19 @@ public class MainActivity extends AppCompatActivity {
                     rootLayout.getPaddingBottom()
             );
         });
-        // Bind your 4 specific functional design buttons from layout
+        SplashScreen splashScreen = SplashScreen.installSplashScreen(this);
+        splashScreen.setKeepOnScreenCondition(() -> !isDataSynced);
+
+        mainHandler.postDelayed(() -> {
+            if (!isDataSynced) {
+                Toast.makeText(MainActivity.this, "Connection to Cuckoo Clock failed!", Toast.LENGTH_LONG).show();
+                finishAffinity(); // Closes the app completely
+            }
+        }, CONNECTION_TIMEOUT_MS);
+
+        // 4. Initialize Bluetooth service and establish the connection loop
+        // (Assuming your existing bound Bluetooth Classic service setup happens here)
+        setupBluetoothConnectionAndSync();
         final Button btnShareWifi = findViewById(R.id.btn_Wifi);      // Button 1
         final Button btnShareTime = findViewById(R.id.btn_sync);      // Button 2
         final Button btnShareWeather = findViewById(R.id.btn_weather); // Button 3
@@ -324,7 +351,10 @@ public class MainActivity extends AppCompatActivity {
 
         // App startup requests permission map and safely fires the background service pipeline
         checkAndRequestPermissions();
+
     }
+
+
 
     @Override
     protected void onResume() {
@@ -969,5 +999,72 @@ public class MainActivity extends AppCompatActivity {
         } catch (IllegalArgumentException e) {
             // Safety drop hook tracking complete
         }
+    }
+
+
+
+
+    private void bindUiViews() {
+        switchSoundDay = findViewById(R.id.switch1);
+        barSoundDay = findViewById(R.id.seekBar1);
+        switchMovementDay = findViewById(R.id.switch2);
+        switchMovementNight = findViewById(R.id.switch3);
+        switchSoundNight = findViewById(R.id.switch4);
+        barSoundNight = findViewById(R.id.seekBar2);
+        switchLightsDay = findViewById(R.id.switch5);
+        switchLightsNight = findViewById(R.id.switch6);
+        switchSmokeDay = findViewById(R.id.switch7);
+        switchSmokeNight = findViewById(R.id.switch8);
+
+        barSoundDay.setMax(100);
+        barSoundNight.setMax(100);
+    }
+
+    private void setupBluetoothConnectionAndSync() {
+        // TODO: In your existing Bluetooth connection callback where the socket opens successfully,
+
+    }
+    public void handleIncomingStateDump(String incomingPayload) {
+        if (incomingPayload.startsWith("SYNC_STATE")) {
+            final String[] dataFields = incomingPayload.split("\u001F"); // Split by US character
+            if (dataFields.length >= 9) {
+                mainHandler.post(() -> {
+                    removeUiListeners();
+                    int volDay = Integer.parseInt(dataFields[1]);
+                    int moveDay = Integer.parseInt(dataFields[2]);
+                    int moveNight = Integer.parseInt(dataFields[3]);
+                    int volNight = Integer.parseInt(dataFields[4]);
+                    int lightDay = Integer.parseInt(dataFields[5]);
+                    int lightNight = Integer.parseInt(dataFields[6]);
+                    int smokeDay = Integer.parseInt(dataFields[7]);
+                    int smokeNight = Integer.parseInt(dataFields[8]);
+                    switchSoundDay.setChecked(volDay > 0);
+                    barSoundDay.setProgress(volDay > 0 ? volDay : 0);
+                    barSoundDay.setEnabled(volDay > 0);
+                    switchMovementDay.setChecked(moveDay == 1);
+                    switchMovementNight.setChecked(moveNight == 1);
+                    switchSoundNight.setChecked(volNight > 0);
+                    barSoundNight.setProgress(volNight > 0 ? volNight : 0);
+                    barSoundNight.setEnabled(volNight > 0);
+                    switchLightsDay.setChecked(lightDay == 1);
+                    switchLightsNight.setChecked(lightNight == 1);
+                    switchSmokeDay.setChecked(smokeDay == 1);
+                    switchSmokeNight.setChecked(smokeNight == 1);
+                    restoreUiListeners();
+                    isDataSynced = true;
+                });
+            }
+        }
+    }
+
+    private void removeUiListeners() {
+        switchSoundDay.setOnCheckedChangeListener(null);
+        barSoundDay.setOnSeekBarChangeListener(null);
+        switchSoundNight.setOnCheckedChangeListener(null);
+        barSoundNight.setOnSeekBarChangeListener(null);
+    }
+
+    private void restoreUiListeners() {
+        // Re-attach your operational switch and slider action listeners here
     }
 }

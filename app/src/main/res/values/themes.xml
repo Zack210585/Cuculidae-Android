@@ -1,9 +1,21 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.Cuculidae" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+<resources xmlns:tools="http://android.com">
+    <!-- 1. Change the base parent strictly to AppCompat to satisfy AppCompatActivity -->
+    <style name="Base.Theme.Cuculidae" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <!-- Customize your theme parameters here if needed -->
     </style>
 
+    <!-- 2. The unified application theme style -->
     <style name="Theme.Cuculidae" parent="Base.Theme.Cuculidae" />
+
+    <!-- 3. The Splash Screen API Theme style configuration -->
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <!-- The background color of your splash screen -->
+        <item name="windowSplashScreenBackground">#FFFFFF</item>
+
+        <!-- Your app icon centered on the splash screen -->
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>
+
+        <!-- CRITICAL FIX: Match the exact unified AppCompat theme target -->
+        <item name="postSplashScreenTheme">@style/Theme.Cuculidae</item>
+    </style>
 </resources>

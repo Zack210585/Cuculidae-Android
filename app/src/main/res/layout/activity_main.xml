@@ -58,7 +58,7 @@
 
             <SeekBar
                 android:id="@+id/seekBar1"
-                style="@android:style/Widget.SeekBar"
+                style="@style/Widget.AppCompat.SeekBar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:progressTint="@color/material_dynamic_neutral10" />
@@ -72,7 +72,7 @@
 
             <SeekBar
                 android:id="@+id/seekBar2"
-                style="@android:style/Widget.SeekBar"
+                style="@style/Widget.AppCompat.SeekBar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:progressTint="@color/material_dynamic_neutral10" />

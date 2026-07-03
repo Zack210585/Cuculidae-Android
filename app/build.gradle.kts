@@ -44,6 +44,8 @@ dependencies {
     implementation("com.android.volley:volley:1.2.1")
     //noinspection UseTomlInstead,GradleDependency
     implementation("androidx.work:work-runtime:2.9.0")
+    //noinspection UseTomlInstead
+    implementation("androidx.core:core-splashscreen:1.0.1")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
