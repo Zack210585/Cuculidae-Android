@@ -27,11 +27,14 @@ import android.provider.CalendarContract;
 import android.provider.Settings;
 import android.text.InputType;
 import android.text.format.DateFormat;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
+import android.widget.Switch;
 import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -145,13 +148,115 @@ public class MainActivity extends AppCompatActivity {
         // Initialize networking utility architectures
         wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         volleyRequestQueue = Volley.newRequestQueue(this);
-
+        View rootLayout = findViewById(R.id.main_root_layout);
+        rootLayout.post(() -> {
+            int screenHeight = rootLayout.getHeight();
+            int topPadding = (int) (screenHeight * 0.12); // 0.15 = 15% shift down
+            rootLayout.setPadding(
+                    rootLayout.getPaddingLeft(),
+                    topPadding,
+                    rootLayout.getPaddingRight(),
+                    rootLayout.getPaddingBottom()
+            );
+        });
         // Bind your 4 specific functional design buttons from layout
-        Button btnShareWifi = findViewById(R.id.btn_Wifi);      // Button 1
-        Button btnShareTime = findViewById(R.id.btn_sync);      // Button 2
-        Button btnShareWeather = findViewById(R.id.btn_weather); // Button 3
-        Button btnShareCalendar = findViewById(R.id.btn_calendar); // Button 4
+        final Button btnShareWifi = findViewById(R.id.btn_Wifi);      // Button 1
+        final Button btnShareTime = findViewById(R.id.btn_sync);      // Button 2
+        final Button btnShareWeather = findViewById(R.id.btn_weather); // Button 3
+        final Button btnShareCalendar = findViewById(R.id.btn_calendar); // Button 4
+        final Switch switchSoundDay = findViewById(R.id.switch1);
+        final SeekBar barSoundDay = findViewById(R.id.seekBar1);
+        final Switch switchSoundNight = findViewById(R.id.switch2);
+        final SeekBar barSoundNight = findViewById(R.id.seekBar2);
+        final Switch switchMovementDay = findViewById(R.id.switch3);
+        final Switch switchMovementNight = findViewById(R.id.switch4);
+        final Switch switchLightsDay = findViewById(R.id.switch5);
+        final Switch switchLightsNight = findViewById(R.id.switch6);
+        final Switch switchSmokeDay = findViewById(R.id.switch7);
+        final Switch switchSmokeNight = findViewById(R.id.switch8);
+        barSoundDay.setMax(100);
+        barSoundNight.setMax(100);
 
+        barSoundDay.setEnabled(false);
+        barSoundNight.setEnabled(false);
+
+        class BluetoothDispatcher {
+            void sendPacket(String header, int value) {
+                if (isBound && bluetoothService != null && bluetoothService.isConnected()) {
+                    // US is your existing string divider variable ('\u001F')
+                    String payload = header + US + value + "\n";
+                    bluetoothService.sendDataToESP32(payload);
+                }
+            }
+        }
+        final BluetoothDispatcher dispatcher = new BluetoothDispatcher();
+
+
+
+
+        switchSoundDay.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                barSoundDay.setEnabled(true);
+                barSoundDay.setProgress(50); // Forces default 50% state
+                dispatcher.sendPacket("SSD", 50);
+            } else {
+                barSoundDay.setEnabled(false);
+                barSoundDay.setProgress(0); // Forces default 50% state
+                dispatcher.sendPacket("SSD", 0);
+            }
+        });
+
+        barSoundDay.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && switchSoundDay.isChecked()) {
+                    dispatcher.sendPacket("SSD", progress);
+                }
+            }
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+
+// 5. NIGHT SOUND CONTROLS (Toggle & Slider)
+        switchSoundNight.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                barSoundNight.setEnabled(true);
+                barSoundNight.setProgress(50); // Forces default 50% state
+                dispatcher.sendPacket("SSN", 50);
+            } else {
+                barSoundNight.setEnabled(false);
+                barSoundNight.setProgress(0);
+                dispatcher.sendPacket("SSN", 0);
+            }
+        });
+
+        barSoundNight.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && switchSoundNight.isChecked()) {
+                    dispatcher.sendPacket("SSN", progress);
+                }
+            }
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+        switchMovementDay.setOnCheckedChangeListener((b, isChecked) ->
+                dispatcher.sendPacket("SMD", isChecked ? 1 : 0));
+
+        switchMovementNight.setOnCheckedChangeListener((b, isChecked) ->
+                dispatcher.sendPacket("SMN", isChecked ? 1 : 0));
+
+        switchLightsDay.setOnCheckedChangeListener((b, isChecked) ->
+                dispatcher.sendPacket("SLD", isChecked ? 1 : 0));
+
+        switchLightsNight.setOnCheckedChangeListener((b, isChecked) ->
+                dispatcher.sendPacket("SLN", isChecked ? 1 : 0));
+
+        switchSmokeDay.setOnCheckedChangeListener((b, isChecked) ->
+                dispatcher.sendPacket("SSMD", isChecked ? 1 : 0));
+
+        switchSmokeNight.setOnCheckedChangeListener((b, isChecked) ->
+                dispatcher.sendPacket("SSMN", isChecked ? 1 : 0));
         // BUTTON 1: Share Wi-Fi SSID & Password + Automated Location Text Sync
         btnShareWifi.setOnClickListener(v -> {
             if (isBound && bluetoothService != null && bluetoothService.isConnected()) {
