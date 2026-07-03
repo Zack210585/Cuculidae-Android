@@ -107,6 +107,10 @@ public class MainActivity extends ComponentActivity {
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
                     startActivity(enableBtIntent);
+                    bluetoothService.setOnDataReceivedListener(incomingString -> {
+                        Toast.makeText(MainActivity.this, "hi", Toast.LENGTH_LONG).show();
+                        handleIncomingStateDump(incomingString.trim()); // Processes data in MainActivity
+                    });
                 }
             } else {
                 bluetoothService.disconnectAndClear();
@@ -154,7 +158,8 @@ public class MainActivity extends ComponentActivity {
 
         mainHandler.postDelayed(() -> {
             if (!isDataSynced) {
-                Toast.makeText(MainActivity.this, "Connection to Cuckoo Clock failed!", Toast.LENGTH_LONG).show();
+
+                //Toast.makeText(MainActivity.this, "Connection to Cuckoo Clock failed!", Toast.LENGTH_LONG).show();
                 finishAffinity(); // Closes the app completely
             }
         }, CONNECTION_TIMEOUT_MS);

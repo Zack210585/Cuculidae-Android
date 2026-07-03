@@ -95,6 +95,13 @@ public class BluetoothClassicService extends Service {
         }
         r.write(dataString.getBytes());
     }
+    public interface OnDataReceivedListener {
+        void onDataReceived(String data);
+    }
+    private OnDataReceivedListener dataListener;
+    public void setOnDataReceivedListener(OnDataReceivedListener listener) {
+        this.dataListener = listener;
+    }
 
     private class ConnectThread extends Thread {
         private final BluetoothSocket socket;
@@ -201,6 +208,10 @@ public class BluetoothClassicService extends Service {
                     if (mmInStream != null) {
                         bytes = mmInStream.read(buffer);
                         String incoming = new String(buffer, 0, bytes);
+                        if (dataListener != null) {
+                            dataListener.onDataReceived(incoming);
+
+                        }
                         android.util.Log.i("Cuculidae_BLE", "Received raw text payload from ESP32: " + incoming);
                     }
                 } catch (IOException e) {
