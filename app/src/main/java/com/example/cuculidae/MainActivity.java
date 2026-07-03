@@ -107,9 +107,21 @@ public class MainActivity extends ComponentActivity {
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
                     startActivity(enableBtIntent);
-                    bluetoothService.setOnDataReceivedListener(incomingString -> {
-                        Toast.makeText(MainActivity.this, "hi", Toast.LENGTH_LONG).show();
-                        handleIncomingStateDump(incomingString.trim()); // Processes data in MainActivity
+                    bluetoothService.setOnDataReceivedListener(new BluetoothClassicService.OnDataReceivedListener() {
+                        @Override
+                        public void onDataReceived(final String incomingString) {
+                            // FORCE the execution context onto the main UI thread
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    // This toast will now display cleanly on your phone screen!
+                                    Toast.makeText(MainActivity.this, "hi: " + incomingString, Toast.LENGTH_SHORT).show();
+
+                                    // Keep your active data stream parser running right after
+                                    handleIncomingStateDump(incomingString.trim());
+                                }
+                            });
+                        }
                     });
                 }
             } else {
