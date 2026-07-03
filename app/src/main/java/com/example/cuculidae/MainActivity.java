@@ -113,40 +113,37 @@ public class MainActivity extends ComponentActivity {
         }
     };
     private final ServiceConnection serviceConnection = new ServiceConnection() {
+// Inside your MainActivity.java -> ServiceConnection layer:
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             BluetoothClassicService.LocalBinder binder = (BluetoothClassicService.LocalBinder) service;
             bluetoothService = binder.getService();
             isBound = true;
 
-            if (bluetoothService.initialize()) {
-                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
-                    startActivity(enableBtIntent);
-                    bluetoothService.setOnDataReceivedListener(new BluetoothClassicService.OnDataReceivedListener() {
-                        @Override
-                        public void onDataReceived(final String incomingString) {
-                            // FORCE the execution context onto the main UI thread
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    // This toast will now display cleanly on your phone screen!
-                                    Toast.makeText(MainActivity.this, "hi: " + incomingString, Toast.LENGTH_SHORT).show();
+            // Attach your operational data callback loop
+            bluetoothService.setOnDataReceivedListener(new BluetoothClassicService.OnDataReceivedListener() {
+                @Override
+                public void onDataReceived(final String incomingString) {
 
-                                    // Keep your active data stream parser running right after
-                                    handleIncomingStateDump(incomingString.trim());
-                                }
-                            });
+                    // 🎯 CRITICAL FIX: Jump from the background thread straight onto the UI thread context!
+                    mainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            // This toast is now safe and will display on your screen in real-time
+                            Toast.makeText(MainActivity.this, "hi: " + incomingString, Toast.LENGTH_SHORT).show();
+
+                            // Route the data payload into your configuration matrix parser right after
+                            handleIncomingStateDump(incomingString.trim());
                         }
                     });
+
                 }
-            } else {
-                bluetoothService.disconnectAndClear();
-                if (!bluetoothService.startAutoConnectLoop()) {
-                    showPairingRequiredDialog();
-                }
-            }
+            });
+
+            // Fire your automated data sync query sequence immediately after binding
+            setupBluetoothConnectionAndSync();
         }
+
 
         @Override
         public void onServiceDisconnected(ComponentName name) {

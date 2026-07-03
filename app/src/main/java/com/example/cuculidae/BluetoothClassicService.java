@@ -208,11 +208,12 @@ public class BluetoothClassicService extends Service {
                     bytes = mmInStream.read(buffer);
                     String incomingString = new String(buffer, 0, bytes).trim();
 
-                    // 🚀 FIX: Broadcast the incoming text string locally across the app environment
+                    if (dataListener != null) {
+                        dataListener.onDataReceived(incomingString);
+                    }
                     Intent intent = new Intent("CUCULIDAE_BLUETOOTH_DATA");
                     intent.putExtra("raw_text", incomingString);
                     sendBroadcast(intent);
-
                 } catch (IOException e) {
                     break;
                 }
