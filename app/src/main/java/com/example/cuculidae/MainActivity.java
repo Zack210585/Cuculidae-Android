@@ -1,11 +1,10 @@
 package com.example.cuculidae;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.location.LocationListener;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -36,23 +35,14 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.Toast;
-
 import androidx.activity.ComponentActivity;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -62,39 +52,29 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.View;
-import android.widget.SeekBar;
-import android.widget.Switch;
-import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.splashscreen.SplashScreen;
 
 public class MainActivity extends ComponentActivity {
     private boolean isDataSynced = false;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private static final int CONNECTION_TIMEOUT_MS = 5000; // 5 seconds to find/connect to clock
+    @SuppressLint("UseSwitchCompatOrMaterialCode")
     private Switch switchSoundDay, switchMovementDay, switchMovementNight, switchSoundNight;
+    @SuppressLint("UseSwitchCompatOrMaterialCode")
     private Switch switchLightsDay, switchLightsNight, switchSmokeDay, switchSmokeNight;
     private SeekBar barSoundDay, barSoundNight;
     private BluetoothClassicService bluetoothService;
     private WifiManager wifiManager;
     private boolean isBound = false;
     private boolean isDialogShowing = false;
-
-    // Core structural variables for your new feature map
     private String selectedNetworkSSID = "";
     private boolean isWifiListAlreadyOpen = false;
     private RequestQueue volleyRequestQueue;
     private Thread udpListenerThread;
     private boolean isUdpListening = false;
-
-    // Bulletproof non-typable data divider (ASCII 31 Unit Separator)
     private final String US = "\u001F";
-
-    // Handles returning from the custom clean Wi-Fi activation screen
     private final ActivityResultLauncher<Intent> panelResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
@@ -105,8 +85,6 @@ public class MainActivity extends ComponentActivity {
                 }
             }
     );
-
-    // BroadcastReceiver handles catching hardware Wi-Fi signals safely
     private final BroadcastReceiver wifiScanReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -118,8 +96,6 @@ public class MainActivity extends ComponentActivity {
             }
         }
     };
-
-    // Original Service Connection layer untouched for complete Bluetooth stability
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -146,7 +122,6 @@ public class MainActivity extends ComponentActivity {
             isBound = false;
         }
     };
-
     private void promptUserToEnableWifi() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             Intent panelIntent = new Intent(Settings.ACTION_WIFI_SETTINGS);
@@ -183,10 +158,6 @@ public class MainActivity extends ComponentActivity {
                 finishAffinity(); // Closes the app completely
             }
         }, CONNECTION_TIMEOUT_MS);
-
-        // 4. Initialize Bluetooth service and establish the connection loop
-        // (Assuming your existing bound Bluetooth Classic service setup happens here)
-        setupBluetoothConnectionAndSync();
         final Button btnShareWifi = findViewById(R.id.btn_Wifi);      // Button 1
         final Button btnShareTime = findViewById(R.id.btn_sync);      // Button 2
         final Button btnShareWeather = findViewById(R.id.btn_weather); // Button 3
@@ -203,10 +174,8 @@ public class MainActivity extends ComponentActivity {
         final Switch switchSmokeNight = findViewById(R.id.switch8);
         barSoundDay.setMax(100);
         barSoundNight.setMax(100);
-
         barSoundDay.setEnabled(false);
         barSoundNight.setEnabled(false);
-
         class BluetoothDispatcher {
             void sendPacket(String header, int value) {
                 if (isBound && bluetoothService != null && bluetoothService.isConnected()) {
@@ -217,9 +186,6 @@ public class MainActivity extends ComponentActivity {
             }
         }
         final BluetoothDispatcher dispatcher = new BluetoothDispatcher();
-
-
-
 
         switchSoundDay.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
@@ -232,7 +198,6 @@ public class MainActivity extends ComponentActivity {
                 dispatcher.sendPacket("SSD", 0);
             }
         });
-
         barSoundDay.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -243,8 +208,6 @@ public class MainActivity extends ComponentActivity {
             @Override public void onStartTrackingTouch(SeekBar seekBar) {}
             @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
-
-// 5. NIGHT SOUND CONTROLS (Toggle & Slider)
         switchSoundNight.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 barSoundNight.setEnabled(true);
@@ -256,7 +219,6 @@ public class MainActivity extends ComponentActivity {
                 dispatcher.sendPacket("SSN", 0);
             }
         });
-
         barSoundNight.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -284,7 +246,6 @@ public class MainActivity extends ComponentActivity {
 
         switchSmokeNight.setOnCheckedChangeListener((b, isChecked) ->
                 dispatcher.sendPacket("SSMN", isChecked ? 1 : 0));
-        // BUTTON 1: Share Wi-Fi SSID & Password + Automated Location Text Sync
         btnShareWifi.setOnClickListener(v -> {
             if (isBound && bluetoothService != null && bluetoothService.isConnected()) {
                 if (wifiManager != null && wifiManager.isWifiEnabled()) {
@@ -299,8 +260,6 @@ public class MainActivity extends ComponentActivity {
                 }
             }
         });
-
-        // BUTTON 2: Share Comprehensive Date & Time Array Package
         btnShareTime.setOnClickListener(v -> {
             if (isBound && bluetoothService != null && bluetoothService.isConnected()) {
                 Calendar cal = Calendar.getInstance();
@@ -316,11 +275,8 @@ public class MainActivity extends ComponentActivity {
                 boolean isSystem12Hour = !DateFormat.is24HourFormat(this);
                 int is1224 = isSystem12Hour ? 1 : 0;
                 int ampm = cal.get(Calendar.AM_PM);
-
-                // Re-mapped payload variables using our safe ASCII 31 Unit Separator string
                 String currentDateTime = String.format(Locale.US, "ST" + US + "%d" + US + "%d" + US + "%d" + US + "%d" + US + "%d" + US + "%d" + US + "%d" + US + "%d" + US + "%d" + US + "%d\n",
                         second, minute, hour, day, month, year, dst, timeZone, is1224, ampm);
-
                 bluetoothService.sendDataToESP32(currentDateTime);
                 Toast.makeText(this, "Time Sync data package sent!", Toast.LENGTH_SHORT).show();
             } else {
@@ -330,28 +286,22 @@ public class MainActivity extends ComponentActivity {
                 }
             }
         });
-
-        // BUTTON 3: Share 7-Day Weather Data via background Geo-Coordinates lookup manually
         btnShareWeather.setOnClickListener(v -> {
             if (isBound && bluetoothService != null && bluetoothService.isConnected()) {
-                fetchAndSendWeatherData(null); // Passing null runs direct Bluetooth transmission path
+                fetchAndSendWeatherData(null);
             } else {
                 Toast.makeText(this, "Cuculidae is not connected yet.", Toast.LENGTH_SHORT).show();
             }
         });
-
-        // BUTTON 4: Share Month Calendar Appointments manually up to 100 event iterations
         btnShareCalendar.setOnClickListener(v -> {
             if (isBound && bluetoothService != null && bluetoothService.isConnected()) {
-                sendCalendarEvents(null); // Passing null runs direct Bluetooth transmission path
+                sendCalendarEvents(null);
             } else {
                 Toast.makeText(this, "Cuculidae is not connected yet.", Toast.LENGTH_SHORT).show();
             }
         });
-
-        // App startup requests permission map and safely fires the background service pipeline
         checkAndRequestPermissions();
-
+        setupBluetoothConnectionAndSync();
     }
 
 
@@ -367,19 +317,16 @@ public class MainActivity extends ComponentActivity {
         } else {
             checkAndRequestPermissions();
         }
-        // Start listening for the 1-minute UDP network beacon frame when app opens
          startUdpBeaconListener();
     }
     @Override
     protected void onPause() {
         super.onPause();
-        // Stops tracking the UDP Wi-Fi socket loop when the view drops out of primary focus
         stopUdpBeaconListener();
     }
 
     private void showPairingRequiredDialog() {
         if (isDialogShowing) return;
-
         isDialogShowing = true;
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Pairing Required");
@@ -430,7 +377,6 @@ public class MainActivity extends ComponentActivity {
             bindClassicService();
         }
     }
-
     private void startWifiScan() {
         isWifiListAlreadyOpen = false;
         Toast.makeText(this, "Scanning for Wi-Fi networks...", Toast.LENGTH_SHORT).show();
@@ -595,7 +541,6 @@ public class MainActivity extends ComponentActivity {
             }
         }
     }
-    // REPLACE YOUR EXISTING fetchAndSendWeatherData METHOD WITH THIS BUILD:
     private void fetchAndSendWeatherData(final String targetIpAddress) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(this, "Location permission missing", Toast.LENGTH_SHORT).show();
@@ -646,7 +591,6 @@ public class MainActivity extends ComponentActivity {
         }
     }
 
-    // Separate helper method handles the raw HTTP streaming operations and Toast display
     private void executeDirectWeatherStream(double latitude, double longitude, final String targetIpAddress) {
         java.util.concurrent.ExecutorService executor = java.util.concurrent.Executors.newSingleThreadExecutor();
 
@@ -745,85 +689,6 @@ public class MainActivity extends ComponentActivity {
             }
         });
     }
-
-
-
-
-
-
-
-
-
-
-
-
-    private void executeWeatherRequest(double lat, double lon, final String targetIpAddress) {
-        String url = String.format(Locale.US, "https://open-meteo.com/", lat, lon);
-
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
-                response -> {
-                    try {
-                        JSONObject daily = response.getJSONObject("daily");
-                        JSONArray maxTemps = daily.getJSONArray("temperature_2m_max");
-                        JSONArray minTemps = daily.getJSONArray("temperature_2m_min");
-                        JSONArray codes = daily.getJSONArray("weather_code");
-                        JSONArray uvIndices = daily.getJSONArray("uv_index_max");
-                        JSONArray rainChances = daily.getJSONArray("precipitation_probability_max");
-
-                        StringBuilder payload = new StringBuilder("WT");
-
-                        for (int i = 0; i < 7; i++) {
-                            int max = (int) Math.round(maxTemps.getDouble(i));
-                            int min = (int) Math.round(minTemps.getDouble(i));
-                            int code = codes.getInt(i);
-                            int uv = (int) Math.round(uvIndices.getDouble(i));
-                            int rain = rainChances.getInt(i);
-
-                            int moonPhaseMock = (Calendar.getInstance().get(Calendar.DAY_OF_MONTH) + i) % 8;
-
-                            payload.append(US).append(code)
-                                    .append(US).append(max)
-                                    .append(US).append(min)
-                                    .append(US).append(moonPhaseMock)
-                                    .append(US).append(rain)
-                                    .append(US).append(uv);
-                        }
-                        payload.append("\n");
-
-                        if (targetIpAddress != null) {
-                            sendDataOverWifi(targetIpAddress, payload.toString());
-                        } else if (isBound && bluetoothService != null && bluetoothService.isConnected()) {
-                            bluetoothService.sendDataToESP32(payload.toString());
-                            Toast.makeText(MainActivity.this, "7-Day Weather sent via Bluetooth!", Toast.LENGTH_SHORT).show();
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        Toast.makeText(MainActivity.this, "Weather Parsing Error", Toast.LENGTH_SHORT).show();
-                    }
-                },
-                error -> {
-                    error.printStackTrace();
-                    Toast.makeText(MainActivity.this, "Weather API error: Server timeout or bad connection.", Toast.LENGTH_LONG).show();
-                }
-        ) {
-            @Override
-            public java.util.Map<String, String> getHeaders() {
-                java.util.HashMap<String, String> headers = new java.util.HashMap<>();
-                headers.put("User-Agent", "CuculidaeAndroidApp/1.0");
-                return headers;
-            }
-        };
-
-        // Set network timeout rule to 10 seconds to accommodate slow cellular data
-        request.setRetryPolicy(new com.android.volley.DefaultRetryPolicy(
-                10000,
-                com.android.volley.DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                com.android.volley.DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-
-        volleyRequestQueue.add(request);
-    }
-
-
     private void sendCalendarEvents(final String targetIpAddress) {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
             return;
@@ -893,8 +758,6 @@ public class MainActivity extends ComponentActivity {
             }
         }
     }
-
-
     private void startUdpBeaconListener() {
         if (isUdpListening) return;
 
@@ -936,7 +799,6 @@ public class MainActivity extends ComponentActivity {
         });
         udpListenerThread.start();
     }
-
     private void stopUdpBeaconListener() {
         isUdpListening = false;
         if (udpListenerThread != null && udpListenerThread.isAlive()) {
@@ -944,7 +806,6 @@ public class MainActivity extends ComponentActivity {
         }
         udpListenerThread = null;
     }
-
     private void sendDataOverWifi(final String ipAddress, final String message) {
         new Thread(() -> {
             DatagramSocket socket = null;
@@ -962,7 +823,6 @@ public class MainActivity extends ComponentActivity {
             }
         }).start();
     }
-
     private final ActivityResultLauncher<String[]> permissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
                 boolean hasRequired = true;
@@ -980,12 +840,10 @@ public class MainActivity extends ComponentActivity {
                     Toast.makeText(this, "Permissions are required.", Toast.LENGTH_LONG).show();
                 }
             });
-
     private void bindClassicService() {
         Intent intent = new Intent(this, BluetoothClassicService.class);
         bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -1000,29 +858,23 @@ public class MainActivity extends ComponentActivity {
             // Safety drop hook tracking complete
         }
     }
-
-
-
-
-    private void bindUiViews() {
-        switchSoundDay = findViewById(R.id.switch1);
-        barSoundDay = findViewById(R.id.seekBar1);
-        switchMovementDay = findViewById(R.id.switch2);
-        switchMovementNight = findViewById(R.id.switch3);
-        switchSoundNight = findViewById(R.id.switch4);
-        barSoundNight = findViewById(R.id.seekBar2);
-        switchLightsDay = findViewById(R.id.switch5);
-        switchLightsNight = findViewById(R.id.switch6);
-        switchSmokeDay = findViewById(R.id.switch7);
-        switchSmokeNight = findViewById(R.id.switch8);
-
-        barSoundDay.setMax(100);
-        barSoundNight.setMax(100);
-    }
-
     private void setupBluetoothConnectionAndSync() {
-        // TODO: In your existing Bluetooth connection callback where the socket opens successfully,
+        // A lightweight loop handler that checks for a successful connection state
+        final Handler syncCheckHandler = new Handler(Looper.getMainLooper());
 
+        syncCheckHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                // Check if our service is bound and the RFCOMM serial socket is open
+                if (isBound && bluetoothService != null && bluetoothService.isConnected()) {
+                    String syncRequestPayload = "WS?";
+                    bluetoothService.sendDataToESP32(syncRequestPayload);
+                    syncCheckHandler.removeCallbacks(this);
+                } else {
+                    syncCheckHandler.postDelayed(this, 250);
+                }
+            }
+        });
     }
     public void handleIncomingStateDump(String incomingPayload) {
         if (incomingPayload.startsWith("SYNC_STATE")) {
