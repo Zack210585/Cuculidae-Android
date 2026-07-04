@@ -202,23 +202,24 @@ public class BluetoothClassicService extends Service {
         public void run() {
             byte[] buffer = new byte[1024];
             int bytes;
-            android.util.Log.d("Cuculidae_BLE", "Connected worker thread active. Listening for incoming bytes...");
+
             while (true) {
                 try {
                     bytes = mmInStream.read(buffer);
                     String incomingString = new String(buffer, 0, bytes).trim();
 
+                    // 🎯 ADD THIS DEBUG LOG: Prints exactly what the phone antenna catches
+                    android.util.Log.d("CUCULIDAE_HW", "Antenna Received Raw: [" + incomingString + "]");
+
                     if (dataListener != null) {
                         dataListener.onDataReceived(incomingString);
                     }
-                    Intent intent = new Intent("CUCULIDAE_BLUETOOTH_DATA");
-                    intent.putExtra("raw_text", incomingString);
-                    sendBroadcast(intent);
+
                 } catch (IOException e) {
+                    android.util.Log.e("CUCULIDAE_HW", "Socket connection dropped unexpectedly!", e);
                     break;
                 }
             }
-
         }
 
         public void write(byte[] bytes) {
